@@ -1,4 +1,9 @@
+from collections import OrderedDict
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+import pickle
 from sklearn import metrics
 from sklearn.ensemble import RandomForestClassifier
 
@@ -24,15 +29,54 @@ test_labels = []
 test_labels += len(test_n) * [0]
 test_labels += len(test_p) * [1]
 
-f = RandomForestClassifier(n_estimators = 20)
-f = f.fit(train, train_labels)
-
-result = f.predict(test)
-# for item in result:
-#     print(item)
+# rfs = [
+#     ("sqrt",
+#         RandomForestClassifier(n_estimators=20,
+#                                warm_start=True,
+#                                oob_score=True,
+#                                max_features="sqrt",
+#                                random_state=100,
+#                                n_jobs=-1)),
+#     ("log2",
+#         RandomForestClassifier(n_estimators=20,
+#                                warm_start=True,
+#                                max_features='log2',
+#                                oob_score=True,
+#                                random_state=100,
+#                                n_jobs=-1))
+# ]
 #
-score = f.score(test, test_labels)
+# error_rate = OrderedDict((label, []) for label, _ in rfs)
+#
+# for label, rf in rfs:
+#     print(label)
+#     for i in range(100, 501, 10):
+#         print("Trees: " + str(i))
+#         rf.set_params(n_estimators=i)
+#         rf.fit(train, train_labels)
+#
+#         # Record the OOB error for each `n_estimators=i` setting.
+#         oob_error = 1 - rf.oob_score_
+#         error_rate[label].append((i, oob_error))
+#
+# print("Error rate calculated")
+#
+# Generate the "OOB error rate" vs. "n_estimators" plot.
+# for label, err in error_rate.items():
+#     xs, ys = zip(*err)
+#     plt.plot(xs, ys, label=label)
+#
+# plt.xlim(100, 500)
+# plt.xlabel("Number of trees")
+# plt.ylabel("OOB error")
+# plt.legend(loc="upper right")
+# plt.savefig('oob.png')
+
+rf = RandomForestClassifier(n_estimators=250, max_features='sqrt', n_jobs=-1)
+rf.fit(train, train_labels)
+
+score = rf.score(test, test_labels)
 print("Score: " + str(score))
 
-f1 = metrics.f1_score(test_labels, result)
-print("F1: " + str(f1))
+# save model
+pickle.dump(rf, open('rf.sav', 'wb'))
